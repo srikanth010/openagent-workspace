@@ -1,0 +1,14 @@
+fastapi
+uvicorn[standard]
+pydantic
+python-dotenv
+httpx
+openai
+langchain
+langchain-community
+chromadb
+tiktoken
+rich
+pytest
+ruff
+black
