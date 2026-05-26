@@ -5,6 +5,7 @@ Endpoint for recruiters to ask AI questions about Srikanth's background.
 
 import asyncio
 import time
+from pathlib import Path
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException
@@ -75,4 +76,23 @@ async def career_health():
     return {
         "status": "ok",
         "service": "career-agent"
+    }
+
+
+@router.get("/debug/paths")
+async def career_debug_paths():
+    """Debug endpoint to check file paths on the server."""
+    import os
+    mcp_server = Path(__file__).resolve().parent.parent.parent.parent / "mcp" / "career_server.py"
+    root_from_mcp = mcp_server.resolve().parents[2] if mcp_server.exists() else None
+    data_dir = root_from_mcp / "data" if root_from_mcp else None
+    return {
+        "cwd": os.getcwd(),
+        "this_file": str(Path(__file__).resolve()),
+        "mcp_server_path": str(mcp_server),
+        "mcp_server_exists": mcp_server.exists(),
+        "data_dir": str(data_dir) if data_dir else None,
+        "career_yaml_exists": (data_dir / "career.yaml").exists() if data_dir else False,
+        "projects_yaml_exists": (data_dir / "projects.yaml").exists() if data_dir else False,
+        "data_dir_listing": os.listdir(str(data_dir)) if data_dir and data_dir.exists() else [],
     }
