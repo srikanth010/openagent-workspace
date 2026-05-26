@@ -1,10 +1,21 @@
+# Python
 __pycache__/
 *.pyc
 .venv/
+
+# Environment
 .env
+
+# macOS
 .DS_Store
+
+# IDE
 .vscode/
 .idea/
+
+# Logs
 *.log
+
+# Ollama / local data
 data/
 chroma/
