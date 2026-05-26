@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings
+import json
 
 
 class Settings(BaseSettings):
@@ -13,6 +14,15 @@ class Settings(BaseSettings):
 
     class Config:
         env_file = ".env"
+
+    def __init__(self, **data):
+        super().__init__(**data)
+        # Parse ALLOWED_ORIGINS if set as JSON string
+        if isinstance(self.allowed_origins, str):
+            try:
+                self.allowed_origins = json.loads(self.allowed_origins)
+            except json.JSONDecodeError:
+                pass
 
 
 settings = Settings()
