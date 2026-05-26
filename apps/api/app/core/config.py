@@ -4,8 +4,8 @@ import json
 
 class Settings(BaseSettings):
     ollama_base_url: str = "http://127.0.0.1:11434"
-    ollama_model: str = "qwen2.5-coder:32b"
-    career_model: str = "qwen2.5-coder:32b"
+    ollama_model: str = "qwen35fast:latest"
+    career_model: str = "qwen35fast:latest"
     allowed_origins: list[str] = [
         "http://localhost:3000",
         "http://localhost:3001",

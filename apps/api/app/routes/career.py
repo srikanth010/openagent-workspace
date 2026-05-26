@@ -49,7 +49,7 @@ async def career_chat(request: CareerChatRequest) -> CareerChatResponse:
     try:
         result = await asyncio.wait_for(
             run_career_agent(request.message),
-            timeout=60.0
+            timeout=120.0
         )
 
         elapsed_ms = (time.perf_counter() - start_time) * 1000

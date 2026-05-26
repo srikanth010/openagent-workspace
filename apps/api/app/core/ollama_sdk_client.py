@@ -1,8 +1,10 @@
 """
-Async Ollama SDK client for tool-calling chat with LLMs.
-Uses ollama.AsyncClient for proper async/await support.
+Async Ollama SDK client wrapper using thread pool.
+Uses ollama.Client (sync) in a thread pool to avoid blocking the event loop.
+The AsyncClient in ollama library is broken for our use case, so we use sync + executor.
 """
 
+import asyncio
 import ollama
 from typing import Optional
 
@@ -10,10 +12,10 @@ from apps.api.app.core.config import settings
 
 
 class OllamaSDKClient:
-    """Wrapper around ollama.AsyncClient for tool-calling chat."""
+    """Wrapper around ollama.Client using thread pool for async support."""
 
     def __init__(self):
-        self.client = ollama.AsyncClient(host=settings.ollama_base_url)
+        self.client = ollama.Client(host=settings.ollama_base_url)
 
     async def chat_with_tools(
         self,
@@ -23,7 +25,7 @@ class OllamaSDKClient:
         stream: bool = False,
     ) -> ollama.ChatResponse:
         """
-        Call Ollama chat API with tool definitions.
+        Call Ollama chat API with tool definitions (runs in thread pool).
 
         Args:
             messages: List of message dicts with role/content
@@ -34,13 +36,20 @@ class OllamaSDKClient:
         Returns:
             ollama.ChatResponse with tool_calls in message if any were invoked
         """
+        import functools
+
         model = model or settings.career_model
 
-        response = await self.client.chat(
-            model=model,
-            messages=messages,
-            tools=tools,
-            stream=stream,
+        loop = asyncio.get_event_loop()
+        response = await loop.run_in_executor(
+            None,
+            functools.partial(
+                self.client.chat,
+                model=model,
+                messages=messages,
+                tools=tools,
+                stream=stream,
+            ),
         )
 
         return response
