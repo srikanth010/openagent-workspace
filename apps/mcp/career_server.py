@@ -13,7 +13,8 @@ from typing import Any, Optional
 import yaml
 
 # Data directory path (assumes this script is in apps/mcp/)
-DATA_DIR = Path(__file__).parent.parent.parent / "data"
+ROOT_DIR = Path(__file__).resolve().parents[2]
+DATA_DIR = ROOT_DIR / "data"
 
 # Global state
 CAREER_DATA = {}

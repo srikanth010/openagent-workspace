@@ -18,4 +18,6 @@ __pycache__/
 
 # Ollama / local data
 data/
+!data/career.yaml
+!data/projects.yaml
 chroma/

@@ -4,10 +4,12 @@ Ollama models don't properly support tool-calling, so we use keyword detection
 to determine which tools to call, then use Ollama to synthesize responses.
 """
 
-from typing import Optional
+import json
+from typing import Optional, Any
 
 from apps.api.app.core.ollama_sdk_client import get_ollama_client
 from apps.api.app.core.mcp_subprocess import MCPClient
+
 
 SYSTEM_PROMPT = """You are an AI assistant representing Srikanth Kanteti's professional background.
 Your role is to answer recruiter and hiring manager questions about his skills, experience, and projects.
@@ -15,13 +17,15 @@ Your role is to answer recruiter and hiring manager questions about his skills, 
 You will receive Srikanth's career data in the user message. Use that data to give detailed, confident answers.
 Do NOT make up companies, roles, or achievements that are not in the provided data. Stick to the facts given.
 
-If the user asks about something unrelated to his career (weather, sports, general knowledge),
-politely redirect back to his professional background.
+If the provided career data is empty or incomplete, clearly say that the profile data source is missing details.
+Do not say Srikanth has no experience unless the data explicitly says that.
+
+If the user asks about something unrelated to his career, politely redirect back to his professional background.
 
 When answering:
 - Be professional and confident
 - Reference specific companies, roles, dates, and achievements from the provided data
-- Be thorough — highlight relevant details that address the user's question
+- Be thorough
 - 2-3 paragraphs typical
 """
 
@@ -34,84 +38,138 @@ class CareerAgent:
         self.mcp_client: Optional[MCPClient] = None
 
     async def _detect_tools(self, user_message: str) -> list[str]:
-        """Detect which tools to call based on user message keywords."""
         message_lower = user_message.lower()
         tools = []
 
-        if any(word in message_lower for word in ['skill', 'expertise', 'proficient', 'know', 'technical', 'capable']):
-            tools.append('list_skills')
         if any(word in message_lower for word in [
-            'experience', 'worked', 'company', 'role', 'job', 'employment',
-            'career', 'history', 'position', 'years', 'where', 'employer'
+            "skill", "skills", "expertise", "proficient", "know",
+            "technical", "capable", "stack", "technologies"
         ]):
-            tools.append('get_experience')
-        if any(word in message_lower for word in ['project', 'build', 'built', 'created', 'made', 'developed']):
-            tools.append('get_projects')
-        if any(word in message_lower for word in ['match', 'fit', 'job description', 'qualify', 'candidate']):
-            tools.append('match_to_role')
-        if any(word in message_lower for word in ['background', 'profile', 'about', 'who', 'summary', 'tell me']):
-            tools.append('get_profile')
-            # Background/about questions should also include experience
-            tools.append('get_experience')
+            tools.append("list_skills")
+
+        if any(word in message_lower for word in [
+            "experience", "worked", "company", "role", "job", "employment",
+            "career", "history", "position", "years", "where", "employer",
+            "background"
+        ]):
+            tools.append("get_experience")
+
+        if any(word in message_lower for word in [
+            "project", "projects", "build", "built", "created",
+            "made", "developed", "portfolio"
+        ]):
+            tools.append("get_projects")
+
+        if any(word in message_lower for word in [
+            "match", "fit", "job description", "qualify", "candidate", "jd"
+        ]):
+            tools.append("match_to_role")
+
+        if any(word in message_lower for word in [
+            "background", "profile", "about", "who", "summary", "tell me"
+        ]):
+            tools.append("get_profile")
+            tools.append("get_experience")
+            tools.append("list_skills")
+            tools.append("get_projects")
 
         if not tools:
-            tools = ['get_profile', 'list_skills', 'get_experience']
+            tools = ["get_profile", "list_skills", "get_experience", "get_projects"]
 
-        return list(set(tools))
+        return list(dict.fromkeys(tools))
+
+    def _normalize_tool_result(self, result: Any) -> str:
+        """Convert MCP tool result into readable text for the LLM."""
+
+        if result is None:
+            return ""
+
+        if isinstance(result, str):
+            return result
+
+        if isinstance(result, dict):
+            # Common MCP format: {"content": [{"type": "text", "text": "..."}]}
+            if "content" in result and isinstance(result["content"], list):
+                parts = []
+                for item in result["content"]:
+                    if isinstance(item, dict):
+                        text = item.get("text")
+                        if text:
+                            parts.append(text)
+                    else:
+                        parts.append(str(item))
+                return "\n".join(parts)
+
+            return json.dumps(result, indent=2)
+
+        if isinstance(result, list):
+            return json.dumps(result, indent=2)
+
+        return str(result)
 
     async def run(self, user_message: str) -> dict:
-        """Run the agent for a single user message."""
         self.mcp_client = MCPClient(timeout_seconds=30)
         tools_used = []
 
         try:
             await self.mcp_client.start()
 
-            # Detect and call tools
             tools_to_call = await self._detect_tools(user_message)
             tool_results = []
 
             for tool_name in tools_to_call:
                 try:
-                    if tool_name == 'match_to_role':
-                        result = await self.mcp_client.call_tool(tool_name, {"job_description": user_message})
+                    if tool_name == "match_to_role":
+                        raw_result = await self.mcp_client.call_tool(
+                            tool_name,
+                            {"job_description": user_message}
+                        )
                     else:
-                        result = await self.mcp_client.call_tool(tool_name, {})
+                        raw_result = await self.mcp_client.call_tool(tool_name, {})
 
-                    tool_results.append(result)
+                    normalized_result = self._normalize_tool_result(raw_result)
+
+                    tool_results.append(
+                        f"--- {tool_name} ---\n{normalized_result}"
+                    )
                     tools_used.append(tool_name)
+
                 except Exception as e:
-                    tool_results.append(f"Error calling {tool_name}: {str(e)}")
+                    tool_results.append(
+                        f"--- {tool_name} ERROR ---\n{str(e)}"
+                    )
 
-            # Build context from tool results
-            context = "\n".join(tool_results) if tool_results else "No tools were called."
+            context = "\n\n".join(tool_results).strip()
 
-            # Use Ollama to synthesize a response
+            if not context:
+                context = "No career data was returned from the MCP tools."
+
             messages = [
                 {
                     "role": "system",
-                    "content": SYSTEM_PROMPT
+                    "content": SYSTEM_PROMPT,
                 },
                 {
                     "role": "user",
                     "content": (
-                        f"Here is Srikanth's career data:\n\n"
+                        "Here is Srikanth's career data from MCP tools:\n\n"
                         f"{context}\n\n"
-                        f"Using the career data above, please answer: {user_message}"
-                    )
-                }
+                        f"Question: {user_message}"
+                    ),
+                },
             ]
 
             response = await self.ollama_client.chat_with_tools(
                 messages=messages,
                 tools=[],
-                stream=False
+                stream=False,
             )
 
             return {
                 "response": response.message.content or "Unable to generate response.",
                 "tools_used": tools_used,
-                "iterations": 1
+                "iterations": 1,
+                "context_preview": context[:1000],
             }
 
         finally:
@@ -120,6 +178,5 @@ class CareerAgent:
 
 
 async def run_career_agent(user_message: str) -> dict:
-    """Entry point for the career agent."""
     agent = CareerAgent()
     return await agent.run(user_message)

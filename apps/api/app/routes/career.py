@@ -28,6 +28,7 @@ class CareerChatResponse(BaseModel):
     tools_used: list[str]
     iterations: int
     response_time_ms: float
+    context_preview: Optional[str] = None
 
 
 @router.post("/chat", response_model=CareerChatResponse)
@@ -58,7 +59,8 @@ async def career_chat(request: CareerChatRequest) -> CareerChatResponse:
             response=result["response"],
             tools_used=result["tools_used"],
             iterations=result["iterations"],
-            response_time_ms=round(elapsed_ms, 2)
+            response_time_ms=round(elapsed_ms, 2),
+            context_preview=result.get("context_preview"),
         )
 
     except asyncio.TimeoutError:

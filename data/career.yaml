@@ -1,0 +1,214 @@
+profile:
+  name: Srikanth Kanteti
+  title: Senior AEM Tech Lead | AEM as a Cloud Service | Headless CMS | Adobe Experience Platform
+  summary: >
+    Senior AEM Developer / Technical Lead with 7+ years of experience architecting and delivering
+    enterprise-scale Adobe Experience Manager solutions across AEM 6.x and AEM as a Cloud Service
+    (AEMaaCS). Deep expertise in AEM Sites, Core Components, MSM, Sling Models, OSGi,
+    Context-Aware Configurations, Dispatcher, and Cloud Manager CI/CD pipelines. Proven track
+    record in leading cloud migrations, implementing headless and composable CMS architectures
+    (Content Fragments, GraphQL, SPA Editor with React, Edge Delivery Services), and integrating
+    AEM with Adobe Experience Platform (AEP), Adobe Journey Optimizer, and enterprise REST services.
+    Forward-looking leader driving AI-ready, scalable digital platforms — including AEM Sites
+    Optimizer, Agentic AI workflows, and GenAI content personalization — while enforcing cloud best
+    practices, security governance, and cross-functional team excellence.
+  email: kantetisrikanth@gmail.com
+  github: https://github.com/srikanth010
+  linkedin: https://www.linkedin.com/in/srikanth-kanteti-94100317a/
+  website: https://srikanthkanteti.com/
+  years_of_experience: 7
+  location: Parsippany, NJ
+
+skills:
+  ai_ml:
+    - LLM Agent Design & Tool Orchestration
+    - Model Context Protocol (MCP) — custom server & client implementation
+    - Local LLM Inference (Ollama, qwen2.5-coder)
+    - RAG (Retrieval-Augmented Generation)
+    - Agentic AI Workflows & Multi-Agent Systems
+    - Keyword-based Tool Dispatch for LLM Agents
+    - Prompt Engineering & Scope Guardrails
+    - AEM Sites Optimizer (Generative AI-powered)
+    - AEP Agent Orchestrator
+    - Generative AI Content Workflows (Adobe Firefly, GenStudio)
+    - Intent-Aware Personalization (AEP + Adobe Target)
+    - Generative Engine Optimization (GEO)
+    - Content AI & Semantic Search
+    - Adobe Target (A/B, XT, AP)
+
+  systems_architecture:
+    - AEM as a Cloud Service (AEMaaCS)
+    - Headless CMS Architecture
+    - Composable CMS (Content Fragments, GraphQL, SPA Editor)
+    - Multi-Site Manager (MSM) with Blueprints & Live Copies
+    - Edge Delivery Services (EDS)
+    - Universal Editor
+    - REST API Design
+    - OSGi Service Architecture
+    - Context-Aware Configurations (CA-Config)
+    - Oak Indexing & JCR Repository
+
+  leadership:
+    - Technical Leadership & Team Mentorship
+    - Cross-functional Collaboration (UX, Product, Engineering)
+    - Agile / Scrum / SAFe
+    - Code Review Leadership
+    - Architecture Reviews & Design
+    - Cloud Migration Planning & Execution
+    - Security Governance & Compliance
+    - DevOps & CI/CD Adoption
+
+  backend_languages:
+    - Python (FastAPI, asyncio, Pydantic)
+    - Java 11/17
+    - JavaScript (ES6+)
+    - TypeScript
+    - Node.js
+    - Maven
+
+  frontend_stack:
+    - React
+    - SPA Editor (React + AEM)
+    - HTL (Sightly)
+    - HTML5 / CSS3
+    - TypeScript
+
+  infrastructure:
+    - Cloud Manager CI/CD
+    - Dispatcher (Cloud)
+    - CDN (Fastly / Akamai / CloudFront)
+    - GitHub Actions
+    - Azure DevOps
+    - Docker
+    - Kubernetes
+    - Railway (cloud deployment)
+    - Cloudflare Tunnel
+    - Adobe I/O Runtime / App Builder
+    - SonarQube (Code Quality Gates)
+
+experience:
+  - company: Wyndham Hotels & Resorts
+    title: Sr. AEM Tech Lead
+    start_date: "2022-04"
+    end_date: Present
+    location: New Jersey, USA
+    highlights:
+      - Led end-to-end AEM 6.5 → AEM as a Cloud Service migration with zero-downtime deployment
+        across global brand sites, including code refactoring, repository restructuring, Dispatcher
+        modernization, and Cloud Manager CI/CD pipeline setup.
+      - Architected and implemented Edge Delivery Services (EDS) with Universal Editor achieving
+        90+ Lighthouse scores and significantly improved SEO and Core Web Vitals.
+      - Integrated AEM Sites Optimizer leveraging generative AI agents to automate traffic
+        acquisition and engagement improvements, reducing manual optimization cycles by 40%.
+      - Integrated AEM with Adobe Experience Platform (AEP) and Adobe Journey Optimizer (AJO)
+        enabling unified customer profiles, real-time personalization, and AI-driven omnichannel
+        experiences.
+      - Implemented AEP Agent Orchestrator workflows to automate content personalization pipelines
+        enabling intent-aware dynamically adjusted experiences aligned with Adobe's 2025 agentic
+        AI strategy.
+      - Configured and optimized Dynamic Media (Smart Crop, Video Encoding, Image Presets) and
+        integrated with AEM Assets and GenStudio for performance marketing workflows.
+      - Implemented Multi-Site Manager (MSM) with Blueprints, Live Copies, and rollout
+        configurations enabling global brand consistency with localized flexibility across 30+
+        regional markets.
+      - Integrated translation workflows using AEM Translation Projects and third-party connectors
+        (Smartling/WorldServer) enabling automated content export/import and regional publishing.
+      - Drove adoption of Context-Aware Configurations (CA-Config), reducing hardcoded
+        configurations by 70% and improving multi-site scalability.
+      - Delivered scalable REST integrations and governed security code scans, Dispatcher hardening
+        (OWASP best practices), performance tuning, and cloud compliance standards.
+
+  - company: East West Bank
+    title: Sr. Applications / AEM Developer
+    start_date: "2021-03"
+    end_date: "2022-04"
+    location: United States
+    highlights:
+      - Led AEM 6.4 → 6.5 upgrade including repository restructuring, deprecated API remediation,
+        bundle compatibility updates, Maven artifact management, and regression validation.
+      - Implemented AEM SPA Editor integration with React enabling dynamic content rendering and
+        author-driven SPA experiences; designed React SPAs powered by AEM as a headless CMS via
+        JSON Model Exporter.
+      - Built reusable Content Fragment Models and GraphQL APIs to support structured headless
+        delivery across web and mobile applications.
+      - Implemented Context-Aware Configurations (CA-Config) to manage environment- and
+        site-specific settings, enabling scalable multi-site architecture.
+      - Refactored legacy JSP/Classic UI components into modern HTL-based components with Sling
+        Models aligned to AEM best practices.
+      - Established JUnit and Mockito test suites, improving code coverage by 35% and reducing
+        post-release defects.
+
+  - company: MAARK
+    title: AEM Developer
+    start_date: "2019-12"
+    end_date: "2021-02"
+    location: Boston, MA
+    highlights:
+      - Developed custom AEM components, Sling Models, and OSGi services for enterprise marketing
+        platforms serving millions of users.
+      - Built modular, reusable headless content architectures aligned with AEM best practices
+        supporting multi-channel delivery.
+      - Integrated Adobe Analytics tracking framework with data layer implementation enabling
+        real-time reporting and campaign attribution.
+      - Increased code quality and test coverage using JUnit; collaborated in Agile teams to
+        deliver scalable digital experiences on schedule.
+
+  - company: Cisco
+    title: AEM Developer (Contract)
+    start_date: "2018-12"
+    end_date: "2019-12"
+    location: Raleigh Durham, NC
+    highlights:
+      - Developed and enhanced AEM components for global enterprise websites serving 50M+ monthly
+        visitors.
+      - Integrated multiple enterprise back-end systems via REST APIs, including CRM and product
+        catalog services.
+      - Implemented Adobe Target A/B testing and experience targeting to drive personalization
+        across Cisco.com properties.
+      - Partnered with UX, product, and engineering teams in Agile delivery environments,
+        consistently meeting sprint milestones.
+
+  - company: Personal Project — OpenAgent Workspace
+    title: AI Engineer (Self-Directed)
+    start_date: "2024-01"
+    end_date: Present
+    location: Remote
+    highlights:
+      - Architected and deployed a production-grade AI agent system using Model Context Protocol
+        (MCP), FastAPI, and Ollama running qwen2.5-coder:7b locally for LLM inference.
+      - Designed a custom MCP server (JSON-RPC 2.0 over stdio) exposing structured career tools
+        (get_profile, list_skills, get_experience, get_projects, match_to_role) consumed by an
+        intelligent career agent.
+      - Built keyword-based tool dispatch layer to reliably orchestrate tool calls without
+        depending on Ollama's native tool-calling support — improving reliability and latency.
+      - Implemented CORS security, scope guardrails in system prompts, and 120-second timeout
+        protection to prevent LLM hallucination and ensure production safety.
+      - Solved async/sync compatibility by wrapping Ollama's sync client in a thread pool
+        executor, enabling non-blocking event loop behavior in FastAPI.
+      - Deployed to Railway via Docker with auto-CI/CD on git push; exposed via Cloudflare Tunnel
+        at https://ai.bullminder.com and integrated with personal Next.js portfolio at
+        https://srikanthkanteti.com.
+      - Designed stateless MCP subprocess management — spawning and gracefully shutting down the
+        MCP server per request for resource isolation and clean teardown.
+
+  - company: Skillvoice Inc
+    title: AEM Developer
+    start_date: "2018-05"
+    end_date: "2019-11"
+    location: Lees Summit, MO
+    highlights:
+      - Built AEM components, editable templates, and workflow models for enterprise web solutions.
+      - Delivered reusable modular architecture and REST API integrations; improved author
+        experience and site performance.
+      - Contributed to MSM-based multi-site delivery and OSGi service development for content
+        personalization.
+
+certifications:
+  - Adobe Certified Expert – AEM Sites Developer
+  - AEM Edge Delivery Services Developer Professional (Adobe, 2025)
+  - Adobe Summit 2025 – AEM Sites Top Innovations, Agentic AI & AEP, Edge Delivery Services
+
+education:
+  - institution: University of Central Missouri
+    degree: Master of Science — Computer Science
+    graduation_year: 2017

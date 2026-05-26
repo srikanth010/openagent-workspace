@@ -1,0 +1,153 @@
+projects:
+  - name: AEM Cloud Migration – Wyndham Hotels & Resorts
+    description: >
+      Led end-to-end migration of AEM 6.5 to AEM as a Cloud Service (AEMaaCS) for Wyndham's
+      global brand sites. Involved full code refactoring, repository restructuring, Dispatcher
+      modernization, and Cloud Manager CI/CD pipeline setup with zero-downtime deployment.
+    tech:
+      - AEM as a Cloud Service
+      - Cloud Manager
+      - Dispatcher
+      - Java
+      - Maven
+      - GitHub Actions
+    highlights:
+      - Zero-downtime deployment across all global brand sites
+      - Eliminated all deprecated APIs and restructured repository to cloud-compatible layout
+      - Established automated CI/CD with Cloud Manager quality gates
+
+  - name: Edge Delivery Services & Universal Editor – Wyndham
+    description: >
+      Architected and implemented Edge Delivery Services (EDS) with Universal Editor for
+      next-generation site delivery at Wyndham Hotels, achieving dramatically improved performance
+      and discoverability including AI search engine (GEO) optimization.
+    tech:
+      - Edge Delivery Services (EDS)
+      - Universal Editor
+      - AEM as a Cloud Service
+      - JavaScript
+      - CDN (Fastly / Akamai)
+    highlights:
+      - Achieved 90+ Lighthouse performance scores across all pages
+      - Significantly improved Core Web Vitals and SEO rankings
+      - Implemented Generative Engine Optimization (GEO) for AI-powered search discoverability
+
+  - name: AEM Sites Optimizer & Agentic AI – Wyndham
+    description: >
+      Integrated AEM Sites Optimizer using generative AI agents to automate traffic acquisition,
+      engagement improvements, and one-click site optimizations. Also implemented AEP Agent
+      Orchestrator for multi-agent content personalization pipelines.
+    tech:
+      - AEM Sites Optimizer
+      - Adobe Experience Platform (AEP)
+      - AEP Agent Orchestrator
+      - Adobe Journey Optimizer (AJO)
+      - Adobe Firefly
+      - GenStudio
+    highlights:
+      - Reduced manual optimization cycles by 40%
+      - Deployed multi-agent AI workflows for automated content personalization at scale
+      - Integrated GenStudio for AI-driven content variations in performance marketing
+
+  - name: AEP & AJO Integration – Wyndham Hotels & Resorts
+    description: >
+      Integrated AEM with Adobe Experience Platform (AEP) and Adobe Journey Optimizer (AJO)
+      to enable unified customer profiles, real-time personalization, and AI-driven omnichannel
+      experiences across Wyndham's 30+ regional brand sites.
+    tech:
+      - Adobe Experience Platform (AEP)
+      - Adobe Journey Optimizer (AJO)
+      - Adobe Target
+      - AEM as a Cloud Service
+      - REST APIs
+    highlights:
+      - Enabled real-time intent-aware personalization using AEP predictive signals
+      - Eliminated manual audience segmentation through AI-driven targeting
+      - Delivered unified customer profiles across web, mobile, and email channels
+
+  - name: Multi-Site Manager (MSM) Global Platform – Wyndham
+    description: >
+      Implemented Multi-Site Manager with Blueprints, Live Copies, rollout configurations,
+      and third-party translation workflow integrations to manage global brand consistency
+      with localized flexibility across Wyndham's portfolio.
+    tech:
+      - AEM Multi-Site Manager (MSM)
+      - AEM Translation Projects
+      - Smartling / WorldServer
+      - AEM as a Cloud Service
+    highlights:
+      - Managed content governance and localization across 30+ regional markets
+      - Automated content export/import via Smartling/WorldServer connectors
+      - Reduced hardcoded configurations by 70% through Context-Aware Configurations
+
+  - name: AEM SPA Editor & Headless CMS – East West Bank
+    description: >
+      Implemented AEM SPA Editor with React at East West Bank, enabling author-driven SPA
+      experiences. Built Content Fragment Models and GraphQL APIs for structured headless content
+      delivery across web and mobile applications.
+    tech:
+      - AEM SPA Editor
+      - React
+      - GraphQL
+      - Content Fragments
+      - JSON Model Exporter
+      - Java
+    highlights:
+      - Enabled authors to manage dynamic SPA content without developer intervention
+      - Built reusable GraphQL API layer supporting both web and mobile consumers
+      - Achieved 35% improvement in test coverage using JUnit and Mockito
+
+  - name: AEM Enterprise Components – Cisco
+    description: >
+      Developed and enhanced AEM components for Cisco.com's global enterprise websites serving
+      50M+ monthly visitors. Integrated CRM and product catalog systems via REST APIs and
+      implemented Adobe Target personalization.
+    tech:
+      - AEM 6.x
+      - Java
+      - Sling Models
+      - OSGi
+      - Adobe Target
+      - REST APIs
+    highlights:
+      - Delivered AEM components for sites with 50M+ monthly visitors
+      - Implemented A/B testing and experience targeting via Adobe Target
+      - Integrated CRM and product catalog services through REST APIs
+
+  - name: OpenAgent Workspace
+    description: >
+      Production-grade AI agent system that serves as an intelligent career assistant for
+      recruiters and hiring managers. Built with FastAPI, a custom MCP (Model Context Protocol)
+      server, and Ollama running qwen2.5-coder:7b locally for LLM inference. The agent
+      intelligently detects which career tools to invoke based on the user's question, executes
+      them via JSON-RPC 2.0 subprocess, and synthesizes a professional response. Deployed on
+      Railway with Docker and exposed via Cloudflare Tunnel, integrated with a Next.js portfolio
+      site at https://srikanthkanteti.com with the API live at https://ai.bullminder.com.
+    tech:
+      - Python
+      - FastAPI
+      - MCP (Model Context Protocol) — JSON-RPC 2.0
+      - Ollama (qwen2.5-coder:7b)
+      - asyncio / thread pool executor
+      - Docker
+      - Railway
+      - Cloudflare Tunnel
+      - Pydantic
+      - YAML
+      - Next.js (frontend integration)
+    highlights:
+      - Custom MCP server exposing 5 structured tools — get_profile, list_skills, get_experience,
+        get_projects, match_to_role — with keyword-based job description scoring (0-100 fit score)
+      - Keyword-based tool dispatch layer that reliably orchestrates multi-tool calls without
+        relying on Ollama's native (unreliable) tool-calling — faster and more predictable
+      - Async-safe Ollama integration using sync client wrapped in thread pool executor to avoid
+        blocking the FastAPI event loop
+      - Stateless MCP subprocess management — server spawned and gracefully shut down per request
+        for full resource isolation
+      - Scope guardrails baked into system prompt to prevent LLM hallucination and keep agent
+        focused on career data only
+      - CORS security configured for specific allowed origins (localhost + srikanthkanteti.com)
+      - 120-second API timeout and 30-second tool call timeout with graceful error responses
+      - Auto CI/CD via Railway — git push to main triggers Docker build and deploy in ~2-3 minutes
+      - Career data managed as version-controlled YAML (career.yaml + projects.yaml) — no database
+        required, easy to update
