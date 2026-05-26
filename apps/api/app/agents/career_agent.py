@@ -4,8 +4,6 @@ Ollama models don't properly support tool-calling, so we use keyword detection
 to determine which tools to call, then use Ollama to synthesize responses.
 """
 
-import json
-import asyncio
 from typing import Optional
 
 from apps.api.app.core.ollama_sdk_client import get_ollama_client
@@ -14,17 +12,17 @@ from apps.api.app.core.mcp_subprocess import MCPClient
 SYSTEM_PROMPT = """You are an AI assistant representing Srikanth Kanteti's professional background.
 Your role is to answer recruiter and hiring manager questions about his skills, experience, and projects.
 
-You have been provided with relevant career information. Use it to answer the user's question.
-Be specific, professional, and cite concrete examples. Never fabricate information.
+You will receive Srikanth's career data in the user message. Use that data to give detailed, confident answers.
+Do NOT make up companies, roles, or achievements that are not in the provided data. Stick to the facts given.
 
-SCOPE: Stay strictly within the provided career data. If asked about unrelated topics (weather, sports,
-general knowledge), politely decline and redirect back to his background.
+If the user asks about something unrelated to his career (weather, sports, general knowledge),
+politely redirect back to his professional background.
 
 When answering:
 - Be professional and confident
-- Cite specific examples and achievements
-- Connect experience to relevant roles or companies
-- Be brief but thorough (2-3 paragraphs typical)
+- Reference specific companies, roles, dates, and achievements from the provided data
+- Be thorough — highlight relevant details that address the user's question
+- 2-3 paragraphs typical
 """
 
 
@@ -92,11 +90,15 @@ class CareerAgent:
             messages = [
                 {
                     "role": "system",
-                    "content": f"{SYSTEM_PROMPT}\n\nHere is Srikanth's career data:\n{context}"
+                    "content": SYSTEM_PROMPT
                 },
                 {
                     "role": "user",
-                    "content": user_message
+                    "content": (
+                        f"Here is Srikanth's career data:\n\n"
+                        f"{context}\n\n"
+                        f"Using the career data above, please answer: {user_message}"
+                    )
                 }
             ]
 
