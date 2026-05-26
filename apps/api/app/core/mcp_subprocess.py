@@ -31,7 +31,7 @@ class MCPClient:
 
         try:
             self.process = await asyncio.create_subprocess_exec(
-                "python",
+                sys.executable,
                 str(MCP_SERVER_PATH),
                 stdin=asyncio.subprocess.PIPE,
                 stdout=asyncio.subprocess.PIPE,

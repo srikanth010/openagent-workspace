@@ -1,4 +1,5 @@
 fastapi
+pyyaml
 uvicorn[standard]
 pydantic
 python-dotenv

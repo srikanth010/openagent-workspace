@@ -42,17 +42,22 @@ class CareerAgent:
 
         if any(word in message_lower for word in ['skill', 'expertise', 'proficient', 'know', 'technical', 'capable']):
             tools.append('list_skills')
-        if any(word in message_lower for word in ['experience', 'worked', 'company', 'role', 'job', 'employment']):
+        if any(word in message_lower for word in [
+            'experience', 'worked', 'company', 'role', 'job', 'employment',
+            'career', 'history', 'position', 'years', 'where', 'employer'
+        ]):
             tools.append('get_experience')
         if any(word in message_lower for word in ['project', 'build', 'built', 'created', 'made', 'developed']):
             tools.append('get_projects')
-        if any(word in message_lower for word in ['match', 'fit', 'role', 'position', 'job description']):
+        if any(word in message_lower for word in ['match', 'fit', 'job description', 'qualify', 'candidate']):
             tools.append('match_to_role')
         if any(word in message_lower for word in ['background', 'profile', 'about', 'who', 'summary', 'tell me']):
             tools.append('get_profile')
+            # Background/about questions should also include experience
+            tools.append('get_experience')
 
         if not tools:
-            tools = ['get_profile', 'list_skills']
+            tools = ['get_profile', 'list_skills', 'get_experience']
 
         return list(set(tools))
 
