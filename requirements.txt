@@ -12,4 +12,3 @@ rich
 pytest
 ruff
 black
-python -c "import fastapi; print('setup ok')"
