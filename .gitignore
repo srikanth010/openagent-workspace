@@ -17,7 +17,9 @@ __pycache__/
 *.log
 
 # Ollama / local data
-data/
+# Keep career data files tracked and available in deployment builds.
+data/*
+!data/
 !data/career.yaml
 !data/projects.yaml
 chroma/

@@ -17,6 +17,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . .
 
+# Ensure career data files are present in the container image.
+COPY data/career.yaml /app/data/career.yaml
+COPY data/projects.yaml /app/data/projects.yaml
+
 # Expose port
 EXPOSE 8000
 
