@@ -29,7 +29,7 @@ Follow the prompts to create a new project.
 Set these in the Railway dashboard or via CLI:
 
 ```bash
-railway variable set OLLAMA_BASE_URL=http://localhost:11434
+railway variable set OLLAMA_BASE_URL=https://ai.bullminder.com
 railway variable set OLLAMA_MODEL=qwen2.5:7b
 railway variable set CAREER_MODEL=qwen2.5:7b
 railway variable set ALLOWED_ORIGINS=https://srikanthkanteti.com,http://localhost:3000
@@ -129,7 +129,7 @@ Should return `access-control-allow-origin: https://srikanthkanteti.com` in resp
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `OLLAMA_BASE_URL` | Ollama server URL | `http://localhost:11434` |
+| `OLLAMA_BASE_URL` | Ollama server URL | `https://ai.bullminder.com` |
 | `OLLAMA_MODEL` | Default Ollama model | `qwen2.5:7b` |
 | `CAREER_MODEL` | Model for career agent | `qwen2.5:7b` |
 | `ALLOWED_ORIGINS` | CORS allowed origins (comma-separated) | `https://srikanthkanteti.com` |
@@ -147,7 +147,7 @@ Should return `access-control-allow-origin: https://srikanthkanteti.com` in resp
 - Verify the domain in your Next.js `.env.local`
 
 ### Model Not Loading
-- Verify Ollama is running: `curl http://localhost:11434/api/tags`
+- Verify Ollama is running: `curl https://ai.bullminder.com/api/tags`
 - Check the model is pulled: `ollama list`
 - View logs: `railway logs`
 
