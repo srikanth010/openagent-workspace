@@ -10,7 +10,7 @@ def ask_ollama(message: str) -> str:
         "messages": [
             {
                 "role": "system",
-                "content": "You are a helpful AI coding assistant."
+                "content": "You are a personal profile assistant. Answer using available profile and project data. If data is missing, state that clearly and ask a focused follow-up question. Do not invent facts outside the provided profile context."
             },
             {
                 "role": "user",
