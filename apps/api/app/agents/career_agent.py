@@ -5,7 +5,7 @@ to determine which tools to call, then use Ollama to synthesize responses.
 """
 
 import json
-from typing import Optional, Any
+from typing import Optional, Any, AsyncIterator
 
 from apps.api.app.core.ollama_sdk_client import get_ollama_client
 from apps.api.app.core.mcp_subprocess import MCPClient
@@ -43,7 +43,7 @@ class CareerAgent:
 
         if any(word in message_lower for word in [
             "skill", "skills", "expertise", "proficient", "know",
-            "technical", "capable", "stack", "technologies"
+            "technical", "capable", "stack", "technologies", "framework"
         ]):
             tools.append("list_skills")
 
@@ -171,6 +171,95 @@ class CareerAgent:
                 "iterations": 1,
                 "context_preview": context[:1000],
             }
+
+        finally:
+            if self.mcp_client:
+                await self.mcp_client.close()
+
+    async def run_streaming(
+        self,
+        user_message: str,
+        conversation_history: Optional[list[dict]] = None,
+    ) -> AsyncIterator[dict]:
+        """
+        Stream the response for a user message using conversation history.
+
+        Args:
+            user_message: Current user message
+            conversation_history: List of prior turns [{"role": "user"|"assistant", "content": "..."}]
+
+        Yields:
+            {"token": "..."} for each token, then {"done": True, "tools_used": [...]}
+        """
+        self.mcp_client = MCPClient(timeout_seconds=30)
+        tools_used = []
+
+        if conversation_history is None:
+            conversation_history = []
+
+        # Cap history at 10 messages (5 turns) to fit context window
+        history = conversation_history[-10:] if len(conversation_history) > 10 else conversation_history
+
+        try:
+            await self.mcp_client.start()
+
+            tools_to_call = await self._detect_tools(user_message)
+            tool_results = []
+
+            for tool_name in tools_to_call:
+                try:
+                    if tool_name == "match_to_role":
+                        raw_result = await self.mcp_client.call_tool(
+                            tool_name,
+                            {"job_description": user_message}
+                        )
+                    else:
+                        raw_result = await self.mcp_client.call_tool(tool_name, {})
+
+                    normalized_result = self._normalize_tool_result(raw_result)
+                    tool_results.append(
+                        f"--- {tool_name} ---\n{normalized_result}"
+                    )
+                    tools_used.append(tool_name)
+
+                except Exception as e:
+                    tool_results.append(
+                        f"--- {tool_name} ERROR ---\n{str(e)}"
+                    )
+
+            context = "\n\n".join(tool_results).strip()
+            if not context:
+                context = "No career data was returned from the MCP tools."
+
+            # Build messages: system + history + current turn with context
+            messages = [
+                {
+                    "role": "system",
+                    "content": SYSTEM_PROMPT,
+                }
+            ]
+
+            # Add prior conversation history
+            for msg in history:
+                messages.append(msg)
+
+            # Add current user message with MCP context
+            messages.append({
+                "role": "user",
+                "content": (
+                    "Here is Srikanth's career data from MCP tools:\n\n"
+                    f"{context}\n\n"
+                    f"Question: {user_message}"
+                ),
+            })
+
+            # Stream tokens from Ollama
+            async for token in self.ollama_client.stream_chat(messages=messages):
+                yield {"token": token}
+
+            # Append this exchange to conversation history
+            # (caller is responsible for saving it via session_store)
+            yield {"done": True, "tools_used": tools_used}
 
         finally:
             if self.mcp_client:

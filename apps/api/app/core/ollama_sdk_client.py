@@ -6,7 +6,8 @@ The AsyncClient in ollama library is broken for our use case, so we use sync + e
 
 import asyncio
 import ollama
-from typing import Optional
+import threading
+from typing import Optional, AsyncIterator
 
 from apps.api.app.core.config import settings
 
@@ -53,6 +54,50 @@ class OllamaSDKClient:
         )
 
         return response
+
+    async def stream_chat(
+        self,
+        messages: list[dict],
+        model: Optional[str] = None,
+    ) -> AsyncIterator[str]:
+        """
+        Stream chat completion tokens from Ollama.
+        Bridges sync Ollama streaming to async via queue + thread.
+
+        Args:
+            messages: List of message dicts with role/content
+            model: Model name (defaults to config setting)
+
+        Yields:
+            Token strings as they are generated
+        """
+        model = model or settings.career_model
+        token_queue: asyncio.Queue[Optional[str]] = asyncio.Queue()
+        loop = asyncio.get_event_loop()
+
+        def _run_in_thread():
+            try:
+                for chunk in self.client.chat(
+                    model=model,
+                    messages=messages,
+                    stream=True,
+                ):
+                    token = chunk.message.content or ""
+                    if token:
+                        loop.call_soon_threadsafe(token_queue.put_nowait, token)
+            except Exception as e:
+                loop.call_soon_threadsafe(token_queue.put_nowait, f"[ERROR: {str(e)}]")
+            finally:
+                loop.call_soon_threadsafe(token_queue.put_nowait, None)
+
+        thread = threading.Thread(target=_run_in_thread, daemon=True)
+        thread.start()
+
+        while True:
+            token = await token_queue.get()
+            if token is None:
+                break
+            yield token
 
 
 # Global instance
