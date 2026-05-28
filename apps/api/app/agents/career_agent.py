@@ -9,6 +9,7 @@ from typing import Optional, Any, AsyncIterator
 
 from apps.api.app.core.ollama_sdk_client import get_ollama_client
 from apps.api.app.core.mcp_subprocess import MCPClient
+from apps.api.app.core.rag_retriever import get_career_retriever
 
 
 SYSTEM_PROMPT = """You are an AI assistant representing Srikanth Kanteti's professional background.
@@ -35,7 +36,25 @@ class CareerAgent:
 
     def __init__(self):
         self.ollama_client = get_ollama_client()
+        self.retriever = get_career_retriever()
         self.mcp_client: Optional[MCPClient] = None
+
+    def _build_rag_context(self, user_message: str) -> tuple[str, Optional[str]]:
+        retrieval = self.retriever.retrieve(user_message)
+        chunks = retrieval.get("chunks", [])
+        error = retrieval.get("error")
+
+        if not chunks:
+            return "", error
+
+        lines = ["--- rag_retrieval ---"]
+        for idx, chunk in enumerate(chunks, start=1):
+            lines.append(
+                f"[{idx}] source={chunk.get('source', 'unknown')} id={chunk.get('id', 'unknown')}"
+            )
+            lines.append(chunk.get("text", ""))
+
+        return "\n".join(lines), error
 
     async def _detect_tools(self, user_message: str) -> list[str]:
         message_lower = user_message.lower()
@@ -110,9 +129,12 @@ class CareerAgent:
     async def run(self, user_message: str) -> dict:
         self.mcp_client = MCPClient(timeout_seconds=30)
         tools_used = []
+        rag_error: Optional[str] = None
 
         try:
             await self.mcp_client.start()
+
+            rag_context, rag_error = self._build_rag_context(user_message)
 
             tools_to_call = await self._detect_tools(user_message)
             tool_results = []
@@ -140,6 +162,9 @@ class CareerAgent:
                     )
 
             context = "\n\n".join(tool_results).strip()
+
+            if rag_context:
+                context = f"{rag_context}\n\n{context}".strip()
 
             if not context:
                 context = "No career data was returned from the MCP tools."
@@ -170,6 +195,7 @@ class CareerAgent:
                 "tools_used": tools_used,
                 "iterations": 1,
                 "context_preview": context[:1000],
+                "rag_error": rag_error,
             }
 
         finally:
@@ -193,6 +219,7 @@ class CareerAgent:
         """
         self.mcp_client = MCPClient(timeout_seconds=30)
         tools_used = []
+        rag_error: Optional[str] = None
 
         if conversation_history is None:
             conversation_history = []
@@ -202,6 +229,8 @@ class CareerAgent:
 
         try:
             await self.mcp_client.start()
+
+            rag_context, rag_error = self._build_rag_context(user_message)
 
             tools_to_call = await self._detect_tools(user_message)
             tool_results = []
@@ -228,6 +257,8 @@ class CareerAgent:
                     )
 
             context = "\n\n".join(tool_results).strip()
+            if rag_context:
+                context = f"{rag_context}\n\n{context}".strip()
             if not context:
                 context = "No career data was returned from the MCP tools."
 
@@ -259,7 +290,7 @@ class CareerAgent:
 
             # Append this exchange to conversation history
             # (caller is responsible for saving it via session_store)
-            yield {"done": True, "tools_used": tools_used}
+            yield {"done": True, "tools_used": tools_used, "rag_error": rag_error}
 
         finally:
             if self.mcp_client:
