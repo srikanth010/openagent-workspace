@@ -33,6 +33,7 @@ class CareerChatResponse(BaseModel):
     iterations: int
     response_time_ms: float
     context_preview: Optional[str] = None
+    session_id: Optional[str] = None
 
 
 @router.post("/chat", response_model=CareerChatResponse)
@@ -50,12 +51,18 @@ async def career_chat(request: CareerChatRequest) -> CareerChatResponse:
         raise HTTPException(status_code=422, detail="Message cannot be empty")
 
     start_time = time.perf_counter()
+    session_store.evict_stale(ttl_seconds=1800)
+    session_id = request.session_id.strip() if request.session_id else str(uuid.uuid4())
+    history = session_store.get_history(session_id, limit=10)
 
     try:
         result = await asyncio.wait_for(
-            run_career_agent(request.message),
+            run_career_agent(request.message, conversation_history=history),
             timeout=120.0
         )
+
+        session_store.append_turn(session_id, "user", request.message)
+        session_store.append_turn(session_id, "assistant", result["response"])
 
         elapsed_ms = (time.perf_counter() - start_time) * 1000
 
@@ -65,6 +72,7 @@ async def career_chat(request: CareerChatRequest) -> CareerChatResponse:
             iterations=result["iterations"],
             response_time_ms=round(elapsed_ms, 2),
             context_preview=result.get("context_preview"),
+            session_id=session_id,
         )
 
     except asyncio.TimeoutError:

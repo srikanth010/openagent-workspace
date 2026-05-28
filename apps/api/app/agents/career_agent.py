@@ -5,7 +5,10 @@ to determine which tools to call, then use Ollama to synthesize responses.
 """
 
 import json
+from pathlib import Path
 from typing import Optional, Any, AsyncIterator
+
+import yaml
 
 from apps.api.app.core.ollama_sdk_client import get_ollama_client
 from apps.api.app.core.mcp_subprocess import MCPClient
@@ -38,6 +41,67 @@ class CareerAgent:
         self.ollama_client = get_ollama_client()
         self.retriever = get_career_retriever()
         self.mcp_client: Optional[MCPClient] = None
+
+    def _load_profile_links(self) -> dict[str, str]:
+        try:
+            repo_root = Path(__file__).resolve().parents[4]
+            career_path = repo_root / "data" / "career.yaml"
+            with open(career_path, "r", encoding="utf-8") as f:
+                data = yaml.safe_load(f) or {}
+            profile = data.get("profile", {})
+            return {
+                "linkedin": str(profile.get("linkedin", "")).strip(),
+                "github": str(profile.get("github", "")).strip(),
+                "website": str(profile.get("website", "")).strip(),
+                "email": str(profile.get("email", "")).strip(),
+            }
+        except Exception:
+            return {"linkedin": "", "github": "", "website": "", "email": ""}
+
+    def _detect_link_target(self, text: str) -> Optional[str]:
+        lowered = text.lower()
+        if "linkedin" in lowered:
+            return "linkedin"
+        if "github" in lowered or "git hub" in lowered:
+            return "github"
+        if "website" in lowered or "portfolio" in lowered or "site" in lowered:
+            return "website"
+        if "email" in lowered or "mail" in lowered:
+            return "email"
+        return None
+
+    def _resolve_follow_up_link(self, user_message: str, conversation_history: list[dict]) -> Optional[str]:
+        lowered = user_message.lower()
+        asks_for_link = any(
+            token in lowered for token in ["link", "url", "resend", "send", "share", "give"]
+        )
+        if not asks_for_link:
+            return None
+
+        target = self._detect_link_target(user_message)
+
+        if not target:
+            for msg in reversed(conversation_history):
+                if msg.get("role") not in {"user", "assistant"}:
+                    continue
+                content = msg.get("content")
+                if not isinstance(content, str):
+                    continue
+                target = self._detect_link_target(content)
+                if target:
+                    break
+
+        if not target:
+            return None
+
+        links = self._load_profile_links()
+        value = links.get(target, "")
+        if not value:
+            return f"{target.title()} is currently unavailable in the profile data."
+
+        if target == "email":
+            return f"Email: {value}"
+        return f"{target.title()} URL: {value}"
 
     def _build_rag_context(self, user_message: str) -> tuple[str, Optional[str]]:
         retrieval = self.retriever.retrieve(user_message)
@@ -126,10 +190,21 @@ class CareerAgent:
 
         return str(result)
 
-    async def run(self, user_message: str) -> dict:
+    async def run(self, user_message: str, conversation_history: Optional[list[dict]] = None) -> dict:
         self.mcp_client = MCPClient(timeout_seconds=30)
         tools_used = []
         rag_error: Optional[str] = None
+        history = conversation_history or []
+
+        follow_up_link = self._resolve_follow_up_link(user_message, history)
+        if follow_up_link:
+            return {
+                "response": follow_up_link,
+                "tools_used": [],
+                "iterations": 1,
+                "context_preview": "",
+                "rag_error": None,
+            }
 
         try:
             await self.mcp_client.start()
@@ -224,6 +299,12 @@ class CareerAgent:
         if conversation_history is None:
             conversation_history = []
 
+        follow_up_link = self._resolve_follow_up_link(user_message, conversation_history)
+        if follow_up_link:
+            yield {"token": follow_up_link}
+            yield {"done": True, "tools_used": [], "rag_error": None}
+            return
+
         # Cap history at 10 messages (5 turns) to fit context window
         history = conversation_history[-10:] if len(conversation_history) > 10 else conversation_history
 
@@ -297,6 +378,6 @@ class CareerAgent:
                 await self.mcp_client.close()
 
 
-async def run_career_agent(user_message: str) -> dict:
+async def run_career_agent(user_message: str, conversation_history: Optional[list[dict]] = None) -> dict:
     agent = CareerAgent()
-    return await agent.run(user_message)
+    return await agent.run(user_message, conversation_history=conversation_history)
